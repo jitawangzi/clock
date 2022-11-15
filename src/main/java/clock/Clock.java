@@ -3,8 +3,6 @@ package clock;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -30,23 +28,12 @@ public class Clock extends JFrame {
 	private volatile long startTime;
 	private volatile boolean isSitting;
 
-	Thread thread;
+	Thread timeThread;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					Clock frame = new Clock();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+		EventQueue.invokeLater(() -> {
+			Clock frame = new Clock();
+			frame.setVisible(true);
 		});
 	}
 
@@ -55,14 +42,13 @@ public class Clock extends JFrame {
 	 */
 	public Clock() {
 		addKeyListener(new KeyAdapter() {
-
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_F1) {
-					thread.interrupt();
+					timeThread.interrupt();
 					sitFirst = true;
 				} else if (e.getKeyCode() == KeyEvent.VK_F2) {
-					thread.interrupt();
+					timeThread.interrupt();
 					sitFirst = false;
 				}
 			}
@@ -75,24 +61,16 @@ public class Clock extends JFrame {
 		setContentPane(contentPane);
 
 		JButton btnNewButton = new JButton("重置计时-坐");
-		btnNewButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				thread.interrupt();
-				sitFirst = true;
-			}
+		btnNewButton.addActionListener(e -> {
+			timeThread.interrupt();
+			sitFirst = true;
 		});
 		contentPane.add(btnNewButton, BorderLayout.NORTH);
 
 		JButton btnNewButton_1 = new JButton("重置计时-站");
-		btnNewButton_1.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				thread.interrupt();
-				sitFirst = false;
-			}
+		btnNewButton_1.addActionListener(e -> {
+			timeThread.interrupt();
+			sitFirst = false;
 		});
 
 		contentPane.add(btnNewButton_1, BorderLayout.SOUTH);
@@ -104,7 +82,7 @@ public class Clock extends JFrame {
 		stateLable.setFont(new Font("", Font.BOLD, fontSize)); // 设置文字的字体及大小
 		panel.add(stateLable);
 
-		thread = new Thread(() -> {
+		timeThread = new Thread(() -> {
 			while (true) {
 				try {
 					if (sitFirst) {
@@ -119,7 +97,7 @@ public class Clock extends JFrame {
 				}
 			}
 		});
-		thread.start();
+		timeThread.start();
 		new Thread(() -> {
 			while (true) {
 				try {
